@@ -38,6 +38,12 @@ let mapEdges = ({vertexData, adjacency, nextId}: t<'v, 'e>, fn: 'e => 'e): t<'v,
   nextId,
 }
 
+let filterVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, fn: (int, 'e) => 'e): t<'v, 'e> => {
+  vertexData: vertexData->Data.Map.filter(fn),
+  adjacency,
+  nextId
+}
+
 let deleteVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, vid: int): t<'v, 'e> => {
   vertexData: vertexData->Data.Map.filter((k, _) => k !== vid),
   adjacency: {

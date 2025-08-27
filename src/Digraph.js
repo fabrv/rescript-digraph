@@ -52,6 +52,14 @@ function mapEdges(param, fn) {
   };
 }
 
+function filterVertex(param, fn) {
+  return {
+    vertexData: Data$RescriptDigraph.$$Map.filter(param.vertexData, fn),
+    adjacency: param.adjacency,
+    nextId: param.nextId
+  };
+}
+
 function deleteVertex(param, vid) {
   let adjacency = param.adjacency;
   return {
@@ -78,6 +86,7 @@ export {
   getEdge,
   mapVertices,
   mapEdges,
+  filterVertex,
   deleteVertex,
   deleteEdge,
 }
