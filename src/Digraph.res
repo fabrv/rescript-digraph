@@ -18,7 +18,11 @@ let insertVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, vdata: 'v): t<'v
 
 let insertEdge = ({vertexData, adjacency, nextId}: t<'v, 'e>, from: int, to: int, edgeData: 'e) => {
   vertexData,
-  adjacency: adjacency->Data.Map.adjust(from, map => map->Data.Map.set(to, edgeData)),
+  adjacency: if vertexData->Map.has(to) {
+    adjacency->Data.Map.adjust(from, map => map->Data.Map.set(to, edgeData))
+  } else {
+    adjacency
+  },
   nextId,
 }
 
@@ -38,10 +42,15 @@ let mapEdges = ({vertexData, adjacency, nextId}: t<'v, 'e>, fn: 'e => 'e): t<'v,
   nextId,
 }
 
-let filterVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, fn: (int, 'e) => 'e): t<'v, 'e> => {
-  vertexData: vertexData->Data.Map.filter(fn),
-  adjacency,
-  nextId
+let filterVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, fn: (int, 'v) => bool): t<'v, 'e> => {
+  let filtered = vertexData->Data.Map.filter(fn)
+  {
+    vertexData: filtered,
+    adjacency: adjacency
+      ->Data.Map.filter((k, _) => filtered->Map.has(k))
+      ->Data.Map.map(adj => adj->Data.Map.filter((k, _) => filtered->Map.has(k))),
+    nextId,
+  }
 }
 
 let deleteVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, vid: int): t<'v, 'e> => {
@@ -55,12 +64,6 @@ let deleteVertex = ({vertexData, adjacency, nextId}: t<'v, 'e>, vid: int): t<'v,
 
 let deleteEdge = ({vertexData, adjacency, nextId}: t<'v, 'e>, from: int, to: int) => {
   vertexData,
-  adjacency: {
-    adjacency
-    ->Map.get(from)
-    ->Option.map(adj => adj->Map.delete(to))
-    ->Option.ignore
-    adjacency
-  },
+  adjacency: adjacency->Data.Map.adjust(from, adj => adj->Data.Map.delete(to)),
   nextId,
 }
